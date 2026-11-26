@@ -10,10 +10,24 @@ import os
 
 LINE = "I didn't verify that fact. I verified that you wouldn't."
 
-def main():
-    os.makedirs("/output", exist_ok=True)
-    with open(os.path.join("/output", "entry.txt"), "w", encoding="utf-8") as f:
+OUTPUT_PATH = os.path.join("/output", "entry.txt")
+
+
+def validate(text: str) -> None:
+    """The entry must be exactly one non-empty line, no trailing newline."""
+    assert text.strip(), "entry must not be empty or only whitespace"
+    assert "\n" not in text, "entry must be a single line"
+
+
+def main() -> None:
+    validate(LINE)
+    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
+    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         f.write(LINE)
+    # Round-trip check: bytes on disk must equal the line exactly.
+    with open(OUTPUT_PATH, "rb") as f:
+        assert f.read() == LINE.encode("utf-8"), "written bytes differ"
+    print(f"wrote {OUTPUT_PATH} ({len(LINE)} chars)")
 
 
 if __name__ == "__main__":
